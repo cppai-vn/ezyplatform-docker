@@ -1,0 +1,8 @@
+.env
+.env.*
+!.env.example
+.artifacts/
+.local-repro/
+**/__pycache__/
+*.pyc
+.DS_Store

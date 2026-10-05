@@ -1,36 +1,30 @@
-FROM debian:11-slim
+ARG EZ_VERSION=1.5.0
+# Extract the platform in a build-only stage; Python is not shipped in runtime.
+FROM python:3.14-alpine AS platform
+ARG EZ_VERSION
+WORKDIR /download
+ADD https://ezyplatform.com/api/v1/platforms/${EZ_VERSION}/download ezyplatform.zip
+RUN python -m zipfile -e ezyplatform.zip /output
 
-ARG EZ_VERSION=latest
-WORKDIR /app
-ENV DEBIAN_FRONTEND=noninteractive \
-    TZ=Etc/UTC
-
-# Database configuration environment variables (can be overridden at runtime)
-ENV DB_HOST=localhost \
+# Keep Java 11 without relying on retired Debian 11 security package downloads.
+FROM eclipse-temurin:11-jre
+ARG EZ_VERSION
+LABEL org.opencontainers.image.title="EzyPlatform" \
+    org.opencontainers.image.version="${EZ_VERSION}"
+WORKDIR /app/ezyplatform
+ENV TZ=Etc/UTC \
+    DB_HOST=localhost \
     DB_PORT=3306 \
     DB_NAME=blog \
-    DB_USERNAME="" \
-    DB_PASSWORD="" \
     DB_TABLES_CREATE_MANUALLY=false \
     AUTO_START_WEB=false
 
-ADD https://ezyplatform.com/api/v1/platforms/${EZ_VERSION}/download ezyplatform.zip
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        openjdk-11-jre-headless \
-        unzip \
-        curl \
-        cron \
-        ca-certificates && \
-    unzip ezyplatform.zip && \
-    rm ezyplatform.zip && \
-    apt-get purge -y unzip && \
-    apt-get autoremove -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-WORKDIR /app/ezyplatform
-
+COPY --from=platform /output/ezyplatform/ /app/ezyplatform/
 COPY --chmod=755 entrypoint.sh /app/entrypoint.sh
 ENTRYPOINT ["/app/entrypoint.sh"]
+
+HEALTHCHECK --interval=30s --timeout=15s --start-period=180s --retries=3 \
+    CMD curl -fsS --max-time 5 "${ADMIN_HEALTHCHECK_URL:-http://127.0.0.1:9090/}" -o /dev/null && \
+        ([ "$AUTO_START_WEB" != "true" ] || curl -fsS --max-time 5 "${WEB_HEALTHCHECK_URL:-http://127.0.0.1:8080/}" -o /dev/null)
 
 EXPOSE 9090 8080 3005 2208 2812/udp

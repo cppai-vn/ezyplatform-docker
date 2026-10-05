@@ -1,0 +1,17 @@
+{
+  "platform_version": "1.5.0",
+  "plugins": [
+    {"name": "ezyarticle", "version": "1.4.4", "sha256": "8e975f4149ca99dc6b2226a2c3ea7db67ec3dd7ce264c25651aa0256dceade5a"},
+    {"name": "ezyaccount", "version": "0.2.0", "sha256": "47dfed1b39922975a049b32d7213af50a4204482e757879fe73a7ca853a591f8"},
+    {"name": "accounting", "version": "0.3.7", "sha256": "0c6138de326f122e97bd2789afed50a03a68cbcc22e15cccf46ab8fe7a5a1832"},
+    {"name": "ezycrm", "version": "0.5.6", "sha256": "899339033ba6df3c7d9f7e5846598bdacdb27cf1461938cc690fae5fdf511717"},
+    {"name": "ezydelivery", "version": "0.7.2", "sha256": "3e95db59961bfbc803ea296197a767bed53cd4737bb101f7b786db5821f4dff3"},
+    {"name": "ezymail", "version": "0.2.5", "sha256": "645a8def510eb903c1f81cc184d1a8be1b9234ea68f1f3fe008f59f1f12b3cd1"},
+    {"name": "ezylogin", "version": "0.3.7", "sha256": "293529c7843ecd902234bbff6d51839c3262138148b1e04364d5ed534a425692"},
+    {"name": "ezysupport", "version": "0.5.2", "sha256": "6c598a572328a6f30cdce3b95ffcbc4f5cbf38ffb790c39a85abfb07e9742d2e"},
+    {"name": "ecommerce", "version": "1.4.5", "sha256": "a06004ab4b424b1fcbbf3af39ef70a3268a9839e142d2ede5a0d18cf2365fdde"},
+    {"name": "ezychat", "version": "0.3.1", "sha256": "cb8051ad63ee63a9068fdf862a2fc10f916069fae6457a09c15dbcac81181d52"},
+    {"name": "ezyoa", "version": "0.3.7", "sha256": "d157a06bad729eac10b34609edbc7d2b94d8f90114ddd1ff3c1864ac2bdc2077"},
+    {"name": "ezypayment", "version": "0.2.2", "sha256": "a606f269aa2342943e35aa550a5943053260105c70e5c3234e9d846d09ede31f"}
+  ]
+}

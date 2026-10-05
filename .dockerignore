@@ -1,0 +1,6 @@
+# Build context allowlist: Dockerfile downloads the platform in a separate stage.
+# Never send environment files, backups, restored data, Git history or tooling.
+**
+!Dockerfile
+!entrypoint.sh
+!.dockerignore

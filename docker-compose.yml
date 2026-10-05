@@ -26,10 +26,10 @@ services:
         dockerfile: Dockerfile
         platforms:
             - linux/amd64
-            - linux/arm64
         args:
-          - EZ_VERSION=latest
-      image: vutadev/ezyplatform-app:latest
+          - EZ_VERSION=1.5.0
+      image: vutadev/ezyplatform-app:1.5.0
+      platform: linux/amd64
       container_name: ezyplatform
       restart: unless-stopped
       depends_on:
