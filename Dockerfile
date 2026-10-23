@@ -1,10 +1,15 @@
-ARG EZ_VERSION=1.5.0
+ARG EZ_VERSION=latest
+ARG EZYARTICLE_VERSION=latest
 # Extract the platform in a build-only stage; Python is not shipped in runtime.
 FROM python:3.14-alpine AS platform
 ARG EZ_VERSION
+ARG EZYARTICLE_VERSION
 WORKDIR /download
 ADD https://ezyplatform.com/api/v1/platforms/${EZ_VERSION}/download ezyplatform.zip
-RUN python -m zipfile -e ezyplatform.zip /output
+ADD https://ezyplatform.com/api/v1/released-projects/ezyarticle/${EZYARTICLE_VERSION}/download?platformVersion=${EZ_VERSION} ezyarticle.zip
+COPY preinstall-modules.py /download/
+RUN python -m zipfile -e ezyplatform.zip /output && \
+    python -I preinstall-modules.py /output/ezyplatform ezyarticle.zip
 
 # Keep Java 11 without relying on retired Debian 11 security package downloads.
 FROM eclipse-temurin:11-jre

@@ -1,20 +1,44 @@
 # EzyPlatform Docker
 
-Java 11 runtime with EzyPlatform **1.5.0**. Database credentials must be supplied at runtime; do not build or commit secrets into the image.
+Java 11 runtime with the **latest EzyPlatform** (1.5.4 at the time of writing) and **EzyArticle preinstalled and activated** (1.4.9 at the time of writing), so a fresh volume opens straight into an admin that can manage pages, posts and page fragments. Database credentials must be supplied at runtime; do not build or commit secrets into the image.
 
 ```sh
-docker build --platform linux/amd64 -t vutadev/ezyplatform-app:1.5.0 .
+docker build --platform linux/amd64 -t vutadev/ezyplatform-app:latest .
 ```
 
-For building and publishing the production x86-64 release explicitly:
+Without build args the image downloads the latest platform and the latest EzyArticle compatible with it from the official marketplace. Pin both for a reproducible release:
 
 ```sh
 docker --context orbstack build --platform linux/amd64 \
-  --build-arg EZ_VERSION=1.5.0 -t vutadev/ezyplatform-app:1.5.0 .
-docker --context orbstack push vutadev/ezyplatform-app:1.5.0
+  --build-arg EZ_VERSION=1.5.4 --build-arg EZYARTICLE_VERSION=1.4.9 \
+  -t vutadev/ezyplatform-app:1.5.4 .
+docker --context orbstack push vutadev/ezyplatform-app:1.5.4
 ```
 
-The compose image references are pinned to `1.5.0`; publishing this tag does not deploy it or change `latest`. The base image contains core 1.5.0 and the startup fix. Upgraded plugins/custom content remain in the restored application volume and are **not bundled into this base image**.
+| Build arg | Default | Meaning |
+|---|---|---|
+| `EZ_VERSION` | `latest` | EzyPlatform core version |
+| `EZYARTICLE_VERSION` | `latest` | EzyArticle version, downloaded for `EZ_VERSION` |
+
+`preinstall-modules.py` runs only in the build stage: it validates every ZIP entry before writing (no traversal, no symlinks, no files outside the module's own `admin|web|socket` folders), extracts the module and marks it active in `.runtime/<lane>/<container>.txt`, the same files `cli.sh "activate ..."` writes.
+
+The compose image references are pinned to `1.5.4`; publishing this tag does not deploy it or change `latest`.
+
+### Existing volumes are not upgraded
+
+Docker copies the image's `/app/ezyplatform` into a named volume only when the volume is empty. A volume created from an older image keeps its old core and has no EzyArticle. Back it up first. For a local site, the simplest path is a fresh volume (`docker compose down -v`, which deletes the data). To only add EzyArticle to an existing volume, use the official CLI inside the running container:
+
+```sh
+docker compose exec ezyplatform bash cli.sh "install ezyarticle"
+for type in admin-plugin web-plugin socket-plugin; do
+  docker compose exec ezyplatform bash cli.sh "activate $type ezyarticle"
+done
+docker compose restart ezyplatform
+```
+
+Upgrading the core of an existing volume is a migration: follow "Before a production rollout" below.
+
+Upgraded plugins/custom content of a restored production volume are **not bundled into this base image**.
 
 ## Startup and health
 
@@ -50,7 +74,7 @@ Choose suitable health URLs if the root route redirects off-site or does not ret
 3. Build and start the local MySQL service:
 
    ```sh
-   docker --context orbstack build -t ezyplatform-local-fixed:1.5.0 .
+   docker --context orbstack build --build-arg EZ_VERSION=1.5.0 -t ezyplatform-local-fixed:1.5.0 .
    docker --context orbstack compose -p ezy-local-repro -f compose.local-repro.yml up -d mysql
    ```
 
